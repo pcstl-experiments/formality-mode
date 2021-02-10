@@ -1,60 +1,48 @@
-(setq formality-built-in-types
-      '("IO"
-	"Unit"
-	"U8"
-	"U16"
-	"U32"
-	"U64"
-	"U256"
-	"App"
-	"Array"
-	"Bit"
-	"Bits"
-	"Bool"
-	"Buffer32"
-	"Char"
-	"Cmp"
-	"Col32"
-	"Either"
-	"Empty"
-	"Equal"
-	"F64"
-	"Function"
-	"Functor"
-	"GMap"
-	"GSet"
-	"Image3D"
-	"Int"
-	"JSON"
-	"Term"
-	"List"
-	"Map"
-	"Maybe"
-	"Monad"
-	"Nat"
-	"Pair"
-	"Pos32"
-	"Queue"
-	"Set"
-	"Sigma"
-	"String"
-	"The"
-	"Vector"
-	"Word"))
-
 (setq formality-keywords
-      '("type" "do"))
+      '("type"
+	"do"
+	"case"
+	"let"
+	"def"
+	"as"
+	"open"
+	"if"
+	"then"
+	"else"
+	"for"
+	"in"
+	"with"
+	"upto"))
 
 (setq formality-highlights
-      `((
-	 ("\"\\.\\*\\?" . font-lock-string-face)
-	 (,(regexp-opt formality-built-in-types 'words) . font-lock-type-face)
+      `((("[A-Z][a-z0-9_]*" . font-lock-type-face)
 	 (,(regexp-opt formality-keywords 'words) . font-lock-keyword-face)
-	 )))
+	 ("'.'" . font-lock-constant-face)
+	 ("[0-9]+[bsul]?" . font-lock-constant-face))))
+
+(setq formality-mode-syntax-table
+      (let ((table (make-syntax-table)))
+	(modify-syntax-entry ?\/ ". 12b" table)
+	(modify-syntax-entry ?\n "> b" table)
+	(modify-syntax-entry ?_ "w" table)
+	table))
+
+(defun formality-completion-at-point ()
+  (interactive)
+  (let* ((bds (bounds-of-thing-at-point 'symbol))
+	 (start (car bds))
+	 (end (cdr bds)))
+    (list start end formality-keywords . nil)))
 
 (define-derived-mode formality-mode prog-mode "Formality"
-  "major mode for editing Formality code"
-  (setq mode-name "Formality")
-  (setq font-lock-defaults formality-highlights))
+  "Major mode for editing Formality code."
+  (setq-local mode-name "Formality")
+  (setq-local font-lock-defaults formality-highlights)
+  (setq-local comment-start "//")
+  (setq-local comment-end "")
+  (add-hook 'completion-at-point-functions
+	    'formality-completion-at-point
+	    nil
+	    'local))
 
 (provide 'formality-mode)
